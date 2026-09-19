@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acchiappa il topo — scheda del dojo Pygame Zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fcfcfa;
+    --grid:#e4eaf1;
+    --ink:#16283c;
+    --ink-soft:#4d6076;
+    --rule:#cfd9e4;
+    --biro:#2f6fed;
+    --amber:#e0912a;
+    --amber-bg:#fdf4e3;
+    --green:#17805a;
+    --green-bg:#e8f6ef;
+    --red:#cf3450;
+    --red-bg:#fdecef;
+    --viola:#6f45c4;
+    --viola-bg:#f1ecfc;
+    --code-bg:#f2f5f9;
+    --code-ink:#1d3350;
+    --shadow:rgba(22,40,60,.10);
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --paper:#131922;
+      --grid:#1b232e;
+      --ink:#e8eef6;
+      --ink-soft:#a3b2c4;
+      --rule:#2b3746;
+      --biro:#7aa5ff;
+      --amber:#f0b45c;
+      --amber-bg:#2a2216;
+      --green:#57c79a;
+      --green-bg:#122a22;
+      --red:#f2788e;
+      --red-bg:#2c161c;
+      --viola:#b394f5;
+      --viola-bg:#221a33;
+      --code-bg:#1a222d;
+      --code-ink:#dce7f4;
+      --shadow:rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#131922; --grid:#1b232e; --ink:#e8eef6; --ink-soft:#a3b2c4;
+    --rule:#2b3746; --biro:#7aa5ff; --amber:#f0b45c; --amber-bg:#2a2216;
+    --green:#57c79a; --green-bg:#122a22; --red:#f2788e; --red-bg:#2c161c;
+    --viola:#b394f5; --viola-bg:#221a33; --code-bg:#1a222d; --code-ink:#dce7f4;
+    --shadow:rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size:22px 22px;
+    color:var(--ink);
+    font-family:"Atkinson Hyperlegible", "Trebuchet MS", system-ui, sans-serif;
+    font-size:17px;
+    line-height:1.62;
+  }
+  .sheet{
+    max-width:50rem;
+    margin:0 auto;
+    padding:0 1.25rem 5rem;
+  }
+
+  /* ---------- testata ---------- */
+  .top{
+    padding:3.5rem 0 2rem;
+    border-bottom:3px solid var(--ink);
+  }
+  .top .kicker{
+    font-family:"Fredoka",sans-serif;
+    font-weight:500;
+    font-size:.95rem;
+    color:var(--biro);
+    letter-spacing:.02em;
+    margin:0 0 .4rem;
+  }
+  h1{
+    font-family:"Fredoka",sans-serif;
+    font-weight:700;
+    font-size:clamp(2.4rem,7vw,3.9rem);
+    line-height:1.02;
+    margin:0 0 .5rem;
+    letter-spacing:-.015em;
+  }
+  .chase{
+    font-size:clamp(2rem,6vw,3rem);
+    line-height:1;
+    margin:.6rem 0 1.1rem;
+    letter-spacing:.15em;
+  }
+  .top p.lede{
+    font-size:1.08rem;
+    color:var(--ink-soft);
+    max-width:38rem;
+    margin:0;
+  }
+
+  /* ---------- struttura ---------- */
+  h2{
+    font-family:"Fredoka",sans-serif;
+    font-weight:600;
+    font-size:1.65rem;
+    line-height:1.2;
+    margin:3.2rem 0 .3rem;
+    padding-bottom:.35rem;
+    border-bottom:2px solid var(--rule);
+  }
+  h3{
+    font-family:"Fredoka",sans-serif;
+    font-weight:600;
+    font-size:1.2rem;
+    margin:2rem 0 .4rem;
+  }
+  p{margin:.7rem 0}
+  ul,ol{margin:.7rem 0; padding-left:1.35rem}
+  li{margin:.3rem 0}
+  a{color:var(--biro)}
+  strong{font-weight:700}
+  .quiet{color:var(--ink-soft)}
+  .section-note{color:var(--ink-soft); margin-top:.15rem}
+
+  /* ---------- codice ---------- */
+  pre{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    border-left:4px solid var(--biro);
+    border-radius:0 6px 6px 0;
+    padding:.9rem 1rem;
+    overflow-x:auto;
+    font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+    font-size:.86rem;
+    line-height:1.55;
+    margin:1rem 0;
+  }
+  code{
+    font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+    font-size:.86em;
+    background:var(--code-bg);
+    color:var(--code-ink);
+    padding:.1em .34em;
+    border-radius:4px;
+  }
+  pre code{background:none;padding:0;font-size:1em}
+
+  /* ---------- tappe ---------- */
+  .step{
+    margin:2.6rem 0 0;
+    padding-top:.3rem;
+  }
+  .step-head{
+    display:flex;
+    align-items:baseline;
+    gap:.75rem;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:.45rem;
+    margin-bottom:.2rem;
+  }
+  .step-num{
+    font-family:"Fredoka",sans-serif;
+    font-weight:700;
+    font-size:2.5rem;
+    line-height:.9;
+    color:var(--biro);
+    flex:0 0 auto;
+    font-variant-numeric:tabular-nums;
+  }
+  .step-title{
+    font-family:"Fredoka",sans-serif;
+    font-weight:600;
+    font-size:1.35rem;
+    line-height:1.15;
+    margin:0;
+  }
+  .step-tags{
+    font-size:.88rem;
+    color:var(--ink-soft);
+    margin:.45rem 0 .2rem;
+  }
+
+  /* ---------- riquadri ---------- */
+  .box{
+    border:2px solid;
+    border-radius:8px;
+    padding:.8rem 1rem .85rem;
+    margin:1.05rem 0;
+  }
+  .box > :first-child{margin-top:0}
+  .box > :last-child{margin-bottom:0}
+  .box-label{
+    font-family:"Fredoka",sans-serif;
+    font-weight:600;
+    font-size:.95rem;
+    display:block;
+    margin-bottom:.2rem;
+  }
+  .run{border-color:var(--green); background:var(--green-bg)}
+  .run .box-label{color:var(--green)}
+  .try{border-color:var(--amber); background:var(--amber-bg)}
+  .try .box-label{color:var(--amber)}
+  .bug{border-color:var(--red); background:var(--red-bg)}
+  .bug .box-label{color:var(--red)}
+  .teach{border-color:var(--viola); background:var(--viola-bg)}
+  .teach .box-label{color:var(--viola)}
+  .say{border-color:var(--rule); background:transparent; border-style:dashed}
+  .say .box-label{color:var(--ink-soft)}
+
+  /* ---------- concetti ---------- */
+  .concept{
+    display:grid;
+    grid-template-columns:13rem 1fr;
+    gap:.4rem 1.2rem;
+    padding:.85rem 0;
+    border-bottom:1px solid var(--rule);
+    align-items:start;
+  }
+  .concept:first-of-type{border-top:1px solid var(--rule)}
+  .concept-name{
+    font-family:"Fredoka",sans-serif;
+    font-weight:600;
+    font-size:1rem;
+  }
+  .concept-body{margin:0}
+  .chip{
+    display:inline-block;
+    font-family:"Fredoka",sans-serif;
+    font-weight:500;
+    font-size:.76rem;
+    color:var(--biro);
+    border:1.5px solid var(--biro);
+    border-radius:99px;
+    padding:.05rem .5rem;
+    margin-top:.3rem;
+    white-space:nowrap;
+  }
+
+  /* ---------- albero cartelle ---------- */
+  .tree{
+    font-family:"JetBrains Mono",monospace;
+    font-size:.84rem;
+    line-height:1.7;
+    background:var(--code-bg);
+    color:var(--code-ink);
+    padding:.9rem 1rem;
+    border-radius:6px;
+    overflow-x:auto;
+    white-space:pre;
+    margin:1rem 0;
+  }
+
+  /* ---------- lista scomposizione ---------- */
+  .plan{
+    list-style:none;
+    padding:0;
+    counter-reset:plan;
+  }
+  .plan li{
+    counter-increment:plan;
+    position:relative;
+    padding-left:2.4rem;
+    margin:.55rem 0;
+  }
+  .plan li::before{
+    content:counter(plan);
+    position:absolute;
+    left:0; top:.1rem;
+    width:1.7rem; height:1.7rem;
+    border-radius:50%;
+    background:var(--biro);
+    color:var(--paper);
+    font-family:"Fredoka",sans-serif;
+    font-weight:600;
+    font-size:.92rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  footer{
+    margin-top:4rem;
+    padding-top:1.2rem;
+    border-top:3px solid var(--ink);
+    font-size:.92rem;
+    color:var(--ink-soft);
+  }
+
+  @media (max-width:640px){
+    body{font-size:16px}
+    .concept{grid-template-columns:1fr; gap:.15rem}
+    .step-num{font-size:2rem}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important}
+  }
+
+  /* ---------- stampa ---------- */
+  @media print{
+    body{
+      background:#fff;
+      color:#000;
+      font-size:10.5pt;
+      line-height:1.45;
+    }
+    .sheet{max-width:none; padding:0}
+    .top{padding-top:0}
+    pre,.tree{background:#f4f4f4; color:#000; font-size:8.5pt}
+    code{background:#f0f0f0; color:#000}
+    .box{background:#fff !important; break-inside:avoid}
+    .step{break-inside:avoid-page}
+    h2{break-after:avoid}
+    .step-head{break-after:avoid}
+    a{color:#000; text-decoration:none}
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+
+<header class="top">
+  <p class="kicker">Scheda del dojo · Python con Pygame Zero</p>
+  <h1>Acchiappa il topo</h1>
+  <div class="chase" aria-hidden="true">🐱 &nbsp;&nbsp;&nbsp; 🐭</div>
+  <p class="lede">Si parte da un file vuoto e si arriva a un gioco che funziona, un pezzo alla volta. Per ogni tappa: <strong>spiego → scrivo → provo</strong>, e solo dopo si passa alla tappa successiva.</p>
+</header>
+
+<h2>Come si legge questa scheda</h2>
+<div class="box say"><span class="box-label">💡 Spiego</span>La spiegazione del concetto nuovo: leggila prima di scrivere il codice.</div>
+<div class="box run"><span class="box-label">▶ Provo</span>Che cosa deve succedere quando lanci il gioco. Se succede altro, si cerca l'errore prima di andare avanti.</div>
+<div class="box try"><span class="box-label">🔬 Esperimento</span>Modifiche da provare per capire meglio. Puoi sempre rimettere il valore di prima.</div>
+<div class="box bug"><span class="box-label">🐞 Bug voluto</span>Questo problema è messo lì apposta: serve a capire perché la tappa dopo esiste.</div>
+<div class="box teach"><span class="box-label">👩‍🏫 Per l'insegnante</span>Note di conduzione: non servono ai ragazzi durante la scrittura del codice.</div>
+
+<h2>0. Prima di iniziare</h2>
+<p>Struttura della cartella:</p>
+<div class="tree">dojo/
+├── gatto.py
+├── images/
+│   ├── cat.png
+│   └── mouse.png
+└── sounds/
+    └── splat.wav</div>
+
+<p>Tre regole di Pygame Zero da sapere subito:</p>
+<ul>
+  <li>si esegue con <code>pgzrun gatto.py</code>, <strong>non</strong> con <code>python gatto.py</code> (altrimenti esce <code>NameError: Actor is not defined</code>);</li>
+  <li>i nomi dei file in <code>images/</code> e <code>sounds/</code> devono essere <strong>minuscoli, senza spazi e senza accenti</strong>;</li>
+  <li><code>Actor("cat")</code> cerca <code>images/cat.png</code>; <code>sounds.splat</code> cerca <code>sounds/splat.wav</code> (oppure <code>.ogg</code>; gli mp3 spesso non funzionano).</li>
+</ul>
+<p>Il file <code>cat.png</code> deve essere disegnato <strong>rivolto verso destra</strong>: in Pygame Zero l'angolo 0 punta a destra e cresce in senso antiorario. Se il gatto guarda in su, ruoterà "storto" nella tappa 7.</p>
+
+<div class="box teach"><span class="box-label">👩‍🏫 Per l'insegnante</span>
+<p>Questo setup va verificato sulle macchine prima del dojo (circa 5 minuti).</p>
+</div>
+
+<h2>1. I concetti Python che incontrerai</h2>
+<p class="section-note">Ognuno viene spiegato <strong>nel momento in cui serve</strong>, non tutti all'inizio. La pallina blu dice in quale tappa compare.</p>
+
+<div class="concept">
+  <div class="concept-name">Variabile</div>
+  <div><p class="concept-body">Un'etichetta appiccicata a un valore. <code>WIDTH = 960</code> significa "da ora in poi WIDTH vuol dire 960". In Scratch è il blocco "variabile", ma qui non devi crearla col mouse.</p><span class="chip">tappa 1</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Assegnazione ≠ uguaglianza</div>
+  <div><p class="concept-body"><code>x = x + 1</code> non è un'equazione: è "prendi il valore di x, aggiungi 1, rimetti dentro x". Punto chiave, quasi sempre frainteso.</p><span class="chip">tappa 4</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Tipi</div>
+  <div><p class="concept-body">Numeri (<code>960</code>), testo (<code>"cat"</code>), coppie/tuple (<code>(480, 300)</code>). Le virgolette servono solo al testo.</p><span class="chip">tappe 1–3</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Commenti</div>
+  <div><p class="concept-body"><code>#</code> apre una riga che il computer ignora: è scritta per gli umani.</p><span class="chip">tappa 1</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Indentazione</div>
+  <div><p class="concept-body">In Python gli spazi contano: ciò che sta "dentro" va rientrato di 4 spazi. È la graffetta dei blocchi di Scratch.</p><span class="chip">tappa 1</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Funzione</div>
+  <div><p class="concept-body"><code>def draw():</code> vuol dire "insegno al computer una nuova mossa". <code>gatto.draw()</code> vuol dire "esegui questa mossa".</p><span class="chip">tappa 1</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Funzioni speciali di Pygame Zero</div>
+  <div><p class="concept-body"><code>draw()</code> e <code>update()</code> non le chiamiamo noi: le chiama il motore, 60 volte al secondo.</p><span class="chip">tappa 4</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Oggetto e proprietà</div>
+  <div><p class="concept-body"><code>topo.x</code>, <code>topo.angle</code>, <code>topo.center</code>: il punto si legge "di". "La x <em>del</em> topo".</p><span class="chip">tappe 2–3</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Proprietà o variabile nostra?</div>
+  <div><p class="concept-body"><code>topo.x</code> esiste già perché <code>topo</code> è un Actor. <code>topo_speed_x</code> ce la inventiamo noi: l'Actor non sa cosa sia.</p><span class="chip">tappa 5</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">import</div>
+  <div><p class="concept-body">Chiedere in prestito una scatola di attrezzi già fatti: <code>random</code>.</p><span class="chip">tappa 3</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">if e condizioni</div>
+  <div><p class="concept-body">Domande a cui si risponde Vero o Falso. <code>or</code> vuol dire "basta una delle due".</p><span class="chip">tappa 6</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">global</div>
+  <div><p class="concept-body">"La variabile che sto cambiando è quella di fuori, non una nuova tutta mia".</p><span class="chip">tappa 5</span></div>
+</div>
+<div class="concept">
+  <div class="concept-name">Eventi</div>
+  <div><p class="concept-body"><code>on_mouse_move(pos)</code> è il "quando il mouse si muove" di Scratch. <code>pos</code> è l'informazione che l'evento ci porta.</p><span class="chip">tappa 7</span></div>
+</div>
+
+<div class="box teach"><span class="box-label">👩‍🏫 Per l'insegnante</span>
+<p><code>global</code> va spiegato solo quando l'errore si presenta (vedi tappa 5). Anticiparlo è tempo sprecato.</p>
+</div>
+
+<h2>2. Scomponiamo il problema</h2>
+<p class="section-note">Prima di toccare la tastiera: se doveste spiegare questo gioco a un robot, quali sono i pezzi? Ogni punto di questa lista corrisponde a una tappa di codice.</p>
+
+<ol class="plan">
+  <li><strong>La scena</strong> — una finestra di una certa dimensione, con uno sfondo.</li>
+  <li><strong>I personaggi</strong> — un gatto e un topo, che devono comparire da qualche parte.</li>
+  <li><strong>Il movimento automatico</strong> — il topo si muove da solo.</li>
+  <li><strong>I limiti</strong> — il topo non deve uscire dallo schermo.</li>
+  <li><strong>Il controllo del giocatore</strong> — il gatto segue il mouse e si gira verso di esso.</li>
+  <li><strong>L'interazione</strong> — se il gatto tocca il topo succede qualcosa (suono).</li>
+  <li><strong>La ripartenza</strong> — dopo un po' il topo torna in gioco in un punto nuovo.</li>
+</ol>
+
+<div class="box teach"><span class="box-label">👩‍🏫 Per l'insegnante</span>
+<p>Fai costruire questo elenco <strong>a loro</strong> alla lavagna, senza computer (circa 10 minuti). Durante il lavoro è utile dire esplicitamente: "ora facciamo il punto 3 della lista".</p>
+</div>
+
+<h2>3. Le tappe</h2>
+
+<!-- 1 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">1</span><h3 class="step-title">La finestra</h3></div>
+  <p class="step-tags">Concetti: variabile · funzione · indentazione · commento</p>
+<pre><code># Dimensioni della finestra
+WIDTH = 960
+HEIGHT = 600
+
+
+def draw():
+    screen.fill((255, 255, 255))</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span><code>pgzrun gatto.py</code> → si apre una finestra bianca.</div>
+  <div class="box try"><span class="box-label">🔬 Esperimento</span>Cambia <code>(255, 255, 255)</code> in <code>(0, 0, 0)</code> e poi in <code>(255, 0, 0)</code>: ecco come funziona l'RGB. Prova anche a mettere <code>WIDTH = 400</code>.</div>
+  <div class="box bug"><span class="box-label">🐞 Errore da provocare apposta</span>Togli i 4 spazi davanti a <code>screen.fill</code> → <code>IndentationError</code>. Serve a rendere l'indentazione una regola vissuta, non subita.</div>
+</section>
+
+<!-- 2 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">2</span><h3 class="step-title">Il gatto</h3></div>
+  <p class="step-tags">Concetti: oggetto · proprietà · dot notation</p>
+<pre><code>gatto = Actor("cat")
+gatto.pos = (480, 300)
+
+
+def draw():
+    screen.fill((255, 255, 255))
+    gatto.draw()</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span>Il gatto appare al centro.</div>
+  <div class="box try"><span class="box-label">🔬 Esperimento</span>Prova <code>gatto.pos = (100, 100)</code>, poi <code>gatto.angle = 45</code>.</div>
+  <div class="box say"><span class="box-label">💡 Da notare</span>Se non scrivi <code>gatto.draw()</code> dentro <code>draw()</code>, il gatto esiste ma non si vede. Creare non è la stessa cosa che disegnare.</div>
+  <div class="box teach"><span class="box-label">👩‍🏫 Per l'insegnante</span>
+  <p>Nel codice originale il gatto non ha una posizione iniziale, quindi parte a cavallo dell'angolo in alto a sinistra finché non si muove il mouse. Con i ragazzi conviene metterla.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">3</span><h3 class="step-title">Il topo in un punto a caso</h3></div>
+  <p class="step-tags">Concetti: import · chiamata con argomenti · tupla</p>
+<pre><code>import random
+
+WIDTH = 960
+HEIGHT = 600
+
+gatto = Actor("cat")
+gatto.pos = (480, 300)
+
+topo = Actor("mouse")
+topo.center = (random.randint(200, 700), random.randint(100, 500))
+
+
+def draw():
+    screen.fill((255, 255, 255))
+    gatto.draw()
+    topo.draw()</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span>Chiudi e riapri il gioco 3 o 4 volte: il topo cambia posto.</div>
+  <div class="box say"><span class="box-label">💡 Domanda</span>Perché i numeri sono 200–700 e non 0–960? Per non farlo nascere mezzo fuori dalla finestra.</div>
+</section>
+
+<!-- 4 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">4</span><h3 class="step-title">Il topo si muove</h3></div>
+  <p class="step-tags">Concetti: update() · assegnazione · game loop</p>
+<pre><code>def update():
+    topo.x = topo.x + 1
+    topo.y = topo.y - 1</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span>Il topo attraversa lo schermo in diagonale… <strong>e scappa fuori</strong>.</div>
+  <div class="box bug"><span class="box-label">🐞 Bug voluto</span>Lascialo scappare: è il problema che rende necessaria la tappa 6.</div>
+  <div class="box say"><span class="box-label">💡 Spiego — questo è il momento chiave</span>
+    <ul>
+      <li><code>update()</code> viene chiamata da Pygame Zero circa 60 volte al secondo. Noi descriviamo <strong>un solo passo</strong>; il movimento nasce dalla ripetizione.</li>
+      <li><strong>Differenza con Scratch:</strong> lì dentro "per sempre" metti "muovi 10 passi" e il blocco continua. Qui un ciclo <code>while True</code> dentro <code>update()</code> <strong>congelerebbe il gioco</strong>: la finestra smetterebbe di rispondere, perché non restituiremmo mai il controllo al motore. La ripetizione ce la mette il motore, non noi.</li>
+      <li><code>topo.x = topo.x + 1</code> si legge da destra a sinistra: <em>calcola</em> <code>topo.x + 1</code>, poi <em>metti</em> il risultato dentro <code>topo.x</code>.</li>
+    </ul>
+  </div>
+  <div class="box try"><span class="box-label">🔬 Esperimento</span>Metti <code>+ 5</code>: va più veloce. Perché? Passi più lunghi, stesso numero di frame.</div>
+</section>
+
+<!-- 5 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">5</span><h3 class="step-title">La velocità diventa una variabile</h3></div>
+  <p class="step-tags">Concetti: variabile nostra o proprietà · global</p>
+<pre><code>topo_speed_x = 1
+topo_speed_y = -1
+
+
+def update():
+    topo.x = topo.x + topo_speed_x
+    topo.y = topo.y + topo_speed_y</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span>Funziona come prima, ma ora la velocità ha un nome.</div>
+  <div class="box say"><span class="box-label">💡 Spiego</span>
+    <ul>
+      <li><code>topo.x</code>, <code>topo.center</code>, <code>topo.angle</code> sono <strong>proprietà</strong>: esistono perché <code>topo</code> è un Actor.</li>
+      <li><code>topo_speed_x</code> è una <strong>variabile normale</strong> che ci siamo inventati noi. Non si può scrivere <code>topo.speed_x</code>: l'Actor non sa cosa sia.</li>
+    </ul>
+  </div>
+  <div class="box bug"><span class="box-label">🐞 global, spiegato facendo fallire il codice</span>
+    <p>Aggiungi dentro <code>update()</code>:</p>
+<pre><code>    topo_speed_x = 2   # senza global → UnboundLocalError</code></pre>
+    <p>Errore. Dentro una funzione, se <em>assegni</em> un valore a un nome, Python crea una variabile nuova valida solo lì dentro. Scrivere <code>global topo_speed_x, topo_speed_y</code> in cima alla funzione significa: "non creare una variabile nuova, usa quella di fuori".</p>
+    <p>Poi cancella la riga di prova e lascia la dichiarazione <code>global</code>: servirà davvero nella tappa 6.</p>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">6</span><h3 class="step-title">Rimbalzo sui bordi</h3></div>
+  <p class="step-tags">Concetti: if · condizioni · or · numeri negativi</p>
+<pre><code>def update():
+    global topo_speed_x, topo_speed_y
+
+    topo.x = topo.x + topo_speed_x
+    topo.y = topo.y + topo_speed_y
+
+    # controllo bordi
+    if (topo.top &lt;= 0) or (topo.right &gt;= WIDTH) or (topo.bottom &gt;= HEIGHT) or (topo.left &lt;= 0):
+        topo_speed_x = -1 * topo_speed_x
+        topo_speed_y = -1 * topo_speed_y</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span>Il topo rimbalza e non esce più.</div>
+  <div class="box say"><span class="box-label">💡 Spiego</span><code>top</code>, <code>left</code>, <code>right</code> e <code>bottom</code> sono i quattro bordi dell'immagine. <code>or</code> vuol dire che basta che <strong>una</strong> delle quattro condizioni sia vera.</div>
+  <div class="box try"><span class="box-label">🔬 Da notare, e sfida in più</span>Questo rimbalzo inverte <em>entrambe</em> le velocità, quindi il topo torna indietro sulla stessa diagonale invece di rimbalzare come una pallina da biliardo. È una semplificazione voluta. Se hai tempo: inverti solo <code>x</code> sui bordi laterali e solo <code>y</code> su quelli in alto e in basso.</div>
+</section>
+
+<!-- 7 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">7</span><h3 class="step-title">Il gatto segue il mouse</h3></div>
+  <p class="step-tags">Concetti: eventi · parametri · angoli</p>
+<pre><code>def on_mouse_move(pos):
+    gatto.angle = gatto.angle_to(pos)
+    animate(gatto, pos=pos)</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span>Muovi il mouse: il gatto si gira e insegue con un movimento morbido.</div>
+  <div class="box say"><span class="box-label">💡 Spiego</span>
+    <ul>
+      <li><code>on_mouse_move</code> è un <strong>evento</strong>: non la chiamiamo noi, la chiama Pygame Zero quando il mouse si muove. È il cappello "quando…" di Scratch.</li>
+      <li><code>pos</code> è una coppia <code>(x, y)</code>: il posto dove si trova il mouse in quel momento.</li>
+      <li><code>angle_to</code> calcola l'angolo dal gatto al puntatore; <code>animate</code> fa scivolare il gatto invece di teletrasportarlo.</li>
+    </ul>
+  </div>
+  <div class="box try"><span class="box-label">🔬 Esperimento</span>
+    <p><code>animate(gatto, pos=pos, duration=0.2)</code> → gatto più reattivo. <code>duration=3</code> → gatto pigro. È una bella leva per regolare la difficoltà del gioco.</p>
+    <p>Poi commenta la riga <code>gatto.angle = ...</code> e guarda la differenza.</p>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">8</span><h3 class="step-title">La collisione</h3></div>
+  <p class="step-tags">Concetti: colliderect · suoni · i "trucchi" dei giochi</p>
+<pre><code>    # dentro update(), in fondo
+    if gatto.colliderect(topo):
+        sounds.splat.play()
+        topo.center = (-100, -100)</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span>Acchiappa il topo: parte il suono e il topo sparisce… <strong>per sempre</strong>.</div>
+  <div class="box bug"><span class="box-label">🐞 Bug voluto</span>Secondo problema messo lì apposta: è quello che rende necessaria la tappa 9.</div>
+  <div class="box say"><span class="box-label">💡 Spiego</span><code>colliderect</code> controlla se i due rettangoli si sovrappongono. Il topo non viene "cancellato": lo spostiamo fuori dalla finestra. È un trucco da programmatori, e vale la pena dirlo: i giochi veri sono pieni di trucchi così.</div>
+</section>
+
+<!-- 9 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">9</span><h3 class="step-title">Il topo ritorna</h3></div>
+  <p class="step-tags">Concetti: funzione scritta da noi · clock</p>
+<pre><code>    # dentro update(), dopo aver nascosto il topo
+        clock.schedule_unique(topo_reset, 4.0)
+
+
+def topo_reset():
+    global topo_speed_x, topo_speed_y
+
+    topo_speed_x = random.randint(-1, 1)
+    topo_speed_y = random.randint(-1, 1)
+    topo.center = (random.randint(200, 700), random.randint(100, 500))</code></pre>
+  <div class="box run"><span class="box-label">▶ Provo</span>Dopo 4 secondi il topo ricompare da un'altra parte.</div>
+  <div class="box say"><span class="box-label">💡 Spiego</span>
+    <ul>
+      <li><code>topo_reset</code> è la <strong>prima funzione scritta da noi</strong> e chiamata per nome: fin qui avevamo solo riempito funzioni che il motore chiama da solo.</li>
+      <li><code>clock.schedule_unique(topo_reset, 4.0)</code> vuol dire "tra 4 secondi esegui <code>topo_reset</code>". Attenzione: si passa <code>topo_reset</code> <strong>senza parentesi</strong> — stiamo dando il nome della mossa, non eseguendola adesso.</li>
+      <li><code>schedule_unique</code> invece di <code>schedule</code>: se il gatto resta sopra al topo, <code>update()</code> farebbe la prenotazione decine di volte al secondo. <code>unique</code> ne tiene una sola.</li>
+    </ul>
+  </div>
+  <div class="box bug"><span class="box-label">🐞 Bug voluto numero 3</span>
+    <p><code>random.randint(-1, 1)</code> può restituire anche <strong>0</strong>. Cosa succede se escono due zeri? Il topo resta immobile. E se esce uno zero solo? Va solo in orizzontale o solo in verticale.</p>
+    <p>Scoprilo giocando, poi prova a proporre una correzione. La soluzione più leggibile è <code>random.choice([-1, 1])</code>.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="step">
+  <div class="step-head"><span class="step-num">10</span><h3 class="step-title">Sfide aperte, se avanza tempo</h3></div>
+  <ol>
+    <li>Contatore di topi presi: una variabile <code>punti</code>, e <code>screen.draw.text(str(punti), (20, 20), color="black")</code> dentro <code>draw()</code>.</li>
+    <li>Il topo accelera ogni volta che viene preso.</li>
+    <li>Due topi: introduce l'idea di lista.</li>
+    <li>Rimbalzo "fisico" corretto (vedi tappa 6).</li>
+    <li>Timer di gioco con <code>clock.schedule</code>.</li>
+  </ol>
+</section>
+
+<h2>Gestione d'aula</h2>
+<div class="box teach"><span class="box-label">👩‍🏫 Per l'insegnante — cose che funzionano con gli 11–12</span>
+  <ul>
+    <li><strong>Un solo file, mai copia-incolla</strong> dall'insegnante ai ragazzi: scrivono tutto a mano. È lento, ma è lì che si impara.</li>
+    <li><strong>Regola "esegui dopo ogni 3 righe"</strong>: gli errori restano piccoli e localizzabili.</li>
+    <li><strong>I tre bug voluti</strong> (topo che scappa, topo che sparisce, velocità zero) sono il cuore didattico: trasformano il tutorial in indagine. Annunciali come sorprese, non come errori propri.</li>
+    <li><strong>Il <code>global</code> va spiegato solo quando l'errore compare.</strong> Anticiparlo è tempo sprecato.</li>
+    <li><strong>Tieni una versione completa e funzionante</strong> su chiavetta per chi resta indietro: si riparte da lì invece di perdere il ragazzo.</li>
+  </ul>
+</div>
+
+<h2>Due avvertenze</h2>
+<div class="box teach"><span class="box-label">👩‍🏫 Per l'insegnante</span>
+  <p><strong>Rischio di allucinazione.</strong> Questa scheda è stata scritta senza eseguire il codice e senza vedere le macchine del laboratorio. Le API di Pygame Zero usate qui (<code>Actor</code>, <code>angle_to</code>, <code>animate</code>, <code>clock.schedule_unique</code>, <code>colliderect</code>) sono riportate secondo la documentazione standard, ma <strong>le tappe 7 e 9 vanno verificate su un computer del laboratorio prima del dojo</strong>: <code>animate</code> con chiamate ripetute e il comportamento esatto di <code>angle_to</code> rispetto all'orientamento del proprio <code>cat.png</code> sono i due punti in cui la resa potrebbe non essere quella descritta. Lo stesso vale per i formati audio accettati: se <code>splat.wav</code> non parte, conviene convertirlo in <code>.ogg</code>.</p>
+  <p><strong>Per una prossima richiesta simile</strong>, il prompt sarebbe più efficace aggiungendo: durata della sessione (90 minuti? 3 ore?), se i ragazzi hanno già fatto Scratch o Python, quanti sono e se lavorano in coppia, se immagini e suoni esistono già o vanno trovati, e se serve anche un handout stampabile separato. Questo permette di calibrare quante tappe stanno realisticamente nel tempo e quanto spiegare di ogni concetto.</p>
+</div>
+
+<footer>
+  <p>Acchiappa il topo — scheda del dojo Python con Pygame Zero. Si esegue con <code>pgzrun gatto.py</code>.</p>
+</footer>
+
+</main>
+</body>
+</html>
